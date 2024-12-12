@@ -15,22 +15,16 @@ import { TodoList } from './components/TodoList';
 import { Footer } from './components/Footer';
 import { Error as ErrorCard } from './components/Error';
 
-const deleteArrOfTodos = async (arr: Todo[]) => {
-  const deletion = await Promise.allSettled(
-    arr.map(todo => todoServices.deleteTodo(todo.id)),
-  );
-
-  return deletion;
-};
-
 export const App: React.FC = () => {
   const [todoList, setTodoList] = useState<Todo[]>([]);
+  const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [filterBy, setFilterBy] = useState<FilterBy>('all');
 
   const [deletingCompleteTodos, setDeletingCompleteTodos] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<ErrorMessage>('');
 
+  const [inputText, setInputText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const focusInput = () => {
@@ -78,7 +72,8 @@ export const App: React.FC = () => {
   const handleDeleteAllCompletedTodos = async () => {
     setDeletingCompleteTodos(true);
 
-    deleteArrOfTodos(todoList.filter(todo => todo.completed))
+    todoServices
+      .deleteArrOfTodos(todoList.filter(todo => todo.completed))
       .then(res => {
         const rejectedTodos = res
           .map((result, index) =>
@@ -108,6 +103,49 @@ export const App: React.FC = () => {
       });
   };
 
+  const handleAddingTodo = () => {
+    if (inputRef.current) {
+      inputRef.current.disabled = true;
+
+      if (inputText.trim() === '') {
+        setErrorMessage('Title should not be empty');
+        setTimeout(() => setErrorMessage(''), 3000);
+        inputRef.current.disabled = false;
+        focusInput();
+
+        return;
+      }
+
+      setTempTodo({
+        id: 0,
+        userId: todoServices.USER_ID,
+        title: inputText.trim(),
+        completed: false,
+      });
+
+      todoServices
+        .addPost(inputText.trim())
+        .then(newTodo => {
+          setTodoList(list => [...list, newTodo]);
+          setInputText('');
+        })
+        .catch(() => {
+          setErrorMessage('Unable to add a todo');
+          setTimeout(() => setErrorMessage(''), 3000);
+        })
+        .finally(() => {
+          if (inputRef.current) {
+            inputRef.current.disabled = false;
+          }
+
+          setTempTodo(null);
+          focusInput();
+        });
+    }
+  };
+
+  //const handleUpdatingTodo = () => {};
+
   if (!todoServices.USER_ID) {
     return <UserWarning />;
   }
@@ -117,12 +155,18 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <Header inputRef={inputRef} />
+        <Header
+          inputRef={inputRef}
+          inputText={inputText}
+          setInputText={setInputText}
+          createFunc={handleAddingTodo}
+        />
 
         <TodoList
           todos={currentTodoList}
           handleDeleteTodo={handleDeleteTodo}
           deletingCompleteTodos={deletingCompleteTodos}
+          tempTodo={tempTodo}
         />
 
         {/* Hide the footer if there are no todos */}

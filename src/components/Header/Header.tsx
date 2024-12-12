@@ -4,9 +4,17 @@ import React from 'react';
 
 type Props = {
   inputRef: React.RefObject<HTMLInputElement>;
+  inputText: string;
+  setInputText: (value: string) => void;
+  createFunc: () => void;
 };
 
-export const Header: React.FC<Props> = ({ inputRef }) => {
+export const Header: React.FC<Props> = ({
+  inputRef,
+  inputText,
+  setInputText,
+  createFunc,
+}) => {
   return (
     <header className="todoapp__header">
       {/* this button should have `active` class only if all todos are completed */}
@@ -23,7 +31,18 @@ export const Header: React.FC<Props> = ({ inputRef }) => {
           type="text"
           className="todoapp__new-todo"
           placeholder="What needs to be done?"
+          value={inputText}
           ref={inputRef}
+          onChange={e => {
+            e.preventDefault();
+            setInputText(e.target.value);
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              createFunc();
+            }
+          }}
         />
       </form>
     </header>

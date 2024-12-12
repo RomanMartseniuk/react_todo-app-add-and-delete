@@ -8,12 +8,14 @@ type Props = {
   todos: Todo[];
   handleDeleteTodo: (id: number, callback: CallableFunction) => void;
   deletingCompleteTodos: boolean;
+  tempTodo: Todo | null;
 };
 
 export const TodoList: React.FC<Props> = ({
   todos,
   handleDeleteTodo,
   deletingCompleteTodos,
+  tempTodo,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
@@ -27,6 +29,13 @@ export const TodoList: React.FC<Props> = ({
           />
         );
       })}
+      {tempTodo && (
+        <TodoCard
+          todo={tempTodo}
+          handleDeleteTodo={handleDeleteTodo}
+          deleting={true}
+        />
+      )}
     </section>
   );
 };
