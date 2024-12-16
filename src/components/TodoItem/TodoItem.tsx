@@ -10,7 +10,7 @@ type Props = {
   deleting?: boolean;
 };
 
-export const TodoCard: React.FC<Props> = ({
+export const TodoItem: React.FC<Props> = ({
   todo,
   handleDeleteTodo,
   deleting = false,

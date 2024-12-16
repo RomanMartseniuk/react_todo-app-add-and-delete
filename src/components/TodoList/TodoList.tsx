@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React from 'react';
 import { Todo } from '../../types/Todo';
-import { TodoCard } from '../TodoCard/TodoCard';
+import { TodoItem } from '../TodoItem/TodoItem';
 
 type Props = {
   todos: Todo[];
@@ -21,7 +21,7 @@ export const TodoList: React.FC<Props> = ({
     <section className="todoapp__main" data-cy="TodoList">
       {todos.map(todo => {
         return (
-          <TodoCard
+          <TodoItem
             key={todo.id}
             todo={todo}
             handleDeleteTodo={handleDeleteTodo}
@@ -30,7 +30,7 @@ export const TodoList: React.FC<Props> = ({
         );
       })}
       {tempTodo && (
-        <TodoCard
+        <TodoItem
           todo={tempTodo}
           handleDeleteTodo={handleDeleteTodo}
           deleting={true}

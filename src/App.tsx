@@ -142,8 +142,6 @@ export const App: React.FC = () => {
     }
   };
 
-  //const handleUpdatingTodo = () => {};
-
   if (!todoServices.USER_ID) {
     return <UserWarning />;
   }
