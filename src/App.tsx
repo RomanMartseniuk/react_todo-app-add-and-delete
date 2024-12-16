@@ -16,9 +16,9 @@ import { Footer } from './components/Footer';
 import { Error as ErrorCard } from './components/Error';
 
 export const App: React.FC = () => {
-  const [todoList, setTodoList] = useState<Todo[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
-  const [filterBy, setFilterBy] = useState<FilterBy>('all');
+  const [filterBy, setFilterBy] = useState<FilterBy>(FilterBy.all);
 
   const [deletingCompleteTodos, setDeletingCompleteTodos] = useState(false);
 
@@ -38,7 +38,7 @@ export const App: React.FC = () => {
 
     todoServices
       .getTodos()
-      .then(todos => setTodoList(todos))
+      .then(setTodos)
       .catch(() => {
         setErrorMessage('Unable to load todos');
         setTimeout(() => setErrorMessage(''), 3000);
@@ -46,11 +46,11 @@ export const App: React.FC = () => {
       .finally();
   }, []);
 
-  const currentTodoList: Todo[] = todoList.filter(item => {
+  const currentTodoList: Todo[] = todos.filter(item => {
     return (
-      filterBy === 'all' ||
-      (filterBy === 'active' && item.completed === false) ||
-      (filterBy === 'completed' && item.completed === true)
+      filterBy === FilterBy.all ||
+      (filterBy === FilterBy.active && !item.completed) ||
+      (filterBy === FilterBy.completed && item.completed)
     );
   });
 
@@ -58,7 +58,7 @@ export const App: React.FC = () => {
     callback(true);
     todoServices
       .deleteTodo(id)
-      .then(() => setTodoList(todoList.filter(todo => todo.id !== id)))
+      .then(() => setTodos(todos.filter(todo => todo.id !== id)))
       .catch(() => {
         setErrorMessage('Unable to delete a todo');
         setTimeout(() => setErrorMessage(''), 3000);
@@ -73,20 +73,18 @@ export const App: React.FC = () => {
     setDeletingCompleteTodos(true);
 
     todoServices
-      .deleteArrOfTodos(todoList.filter(todo => todo.completed))
+      .deleteArrOfTodos(todos.filter(todo => todo.completed))
       .then(res => {
         const rejectedTodos = res
           .map((result, index) =>
             result.status === 'rejected'
-              ? todoList.filter(todo => todo.completed)[index]
+              ? todos.filter(todo => todo.completed)[index]
               : null,
           )
           .filter(todo => todo !== null);
 
-        setTodoList(
-          todoList.filter(
-            todo => !todo.completed || rejectedTodos.includes(todo),
-          ),
+        setTodos(
+          todos.filter(todo => !todo.completed || rejectedTodos.includes(todo)),
         );
 
         if (rejectedTodos.length > 0) {
@@ -126,7 +124,7 @@ export const App: React.FC = () => {
       todoServices
         .addPost(inputText.trim())
         .then(newTodo => {
-          setTodoList(list => [...list, newTodo]);
+          setTodos(list => [...list, newTodo]);
           setInputText('');
         })
         .catch(() => {
@@ -170,9 +168,9 @@ export const App: React.FC = () => {
         />
 
         {/* Hide the footer if there are no todos */}
-        {todoList.length > 0 && (
+        {todos.length > 0 && (
           <Footer
-            todos={todoList}
+            todos={todos}
             filterBy={filterBy}
             setFilterBy={setFilterBy}
             deleteCompletedTodos={handleDeleteAllCompletedTodos}
